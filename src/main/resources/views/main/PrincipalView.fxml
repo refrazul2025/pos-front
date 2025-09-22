@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/8"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="org.palina.venta_ui.controllers.PrincipalViewController"
+            stylesheets="@../../styles/principal.css">
+
+    <!-- TOP: Menú + barra con icono y usuario -->
+    <top>
+        <VBox spacing="5">
+            <!-- MenuBar -->
+            <MenuBar fx:id="menuBar">
+                <menus>
+                    <Menu text="Inventario">
+                        <items>
+                            <MenuItem fx:id="menuInventarioAgregar" text="Agregar"/>
+                        </items>
+                    </Menu>
+                    <Menu text="Venta">
+                        <items>
+                            <MenuItem fx:id="menuVentaGenerar" text="Generar"/>
+                            <MenuItem fx:id="menuApartados" text="Apartados"/>
+                        </items>
+                    </Menu>
+                    <Menu text="Admin">
+                        <items>
+                            <MenuItem fx:id="menuAdminUsuarios" text="Usuarios"/>
+                            <MenuItem fx:id="menuAdminRegistros" text="Registros"/>
+                        </items>
+                    </Menu>
+                </menus>
+            </MenuBar>
+
+            <!-- Barra superior con icono y usuario -->
+            <HBox alignment="CENTER_LEFT">
+                <padding>
+                    <Insets top="10" right="10" bottom="10" left="10"/>
+                </padding>
+                <!-- Icono Hello Kitty -->
+                <ImageView fitWidth="40" fitHeight="40">
+                    <image>
+                        <Image url="@../../images/helloKitie.png"/>
+                    </image>
+                </ImageView>
+
+                <!-- espaciador flexible -->
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <!-- Usuario logueado -->
+                <Label fx:id="usuarioLabel"
+                       text="Usuario: —"
+                       style="-fx-font-size: 14px; -fx-text-fill: #d63384;"/>
+            </HBox>
+        </VBox>
+    </top>
+
+    <!-- CENTER: zona para cargar sub-vistas -->
+    <center>
+        <VBox fx:id="contenidoCentral">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+            <!-- por defecto se incluirá la sección de productos -->
+            <fx:include source="/views/venta/VentaView.fxml"/>
+        </VBox>
+    </center>
+
+</BorderPane>

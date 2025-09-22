@@ -1,0 +1,22 @@
+.login-container {
+    -fx-background-color: #ffe5ec;
+    -fx-text-fill: #d63384;
+    -fx-font-family: "Arial";
+}
+
+.alert {
+    -fx-text-fill: red;
+    -fx-font-weight: bold;
+}
+
+.btn-hellokitty {
+    -fx-background-color: #ff69b4;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 10 20 10 20;
+    -fx-background-radius: 10;
+}
+
+.btn-hellokitty:hover {
+    -fx-background-color: #ff85c0;
+}

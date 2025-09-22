@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="org.palina.venta_ui.controllers.LoginController"
+      alignment="CENTER" spacing="15"
+      stylesheets="@../../styles/login.css"
+      fx:id="container"
+      prefWidth="400" prefHeight="500"
+      styleClass="login-container">
+
+    <padding>
+        <Insets top="30" right="30" bottom="30" left="30"/>
+    </padding>
+
+    <ImageView fx:id="imageView" fitHeight="150" preserveRatio="true">
+        <image>
+            <Image url="@../../images/login.png"/>
+        </image>
+    </ImageView>
+
+    <Label fx:id="errorLabel" text="Usuario / contraseña incorrectos" visible="false" styleClass="alert"/>
+
+    <Label text="Correo"/>
+    <TextField fx:id="emailField" promptText="email"/>
+
+    <Label text="Password"/>
+    <PasswordField fx:id="passwordField" promptText="password"/>
+
+    <Button fx:id="loginButton" text="Ingresar" styleClass="btn-hellokitty" onAction="#handleLogin"/>
+
+    <ProgressIndicator fx:id="loadingIndicator" visible="false"/>
+</VBox>

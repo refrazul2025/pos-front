@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx/8.0.221"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.palina.venta_ui.controllers.VentaController"
+      spacing="10"
+      styleClass="root"
+      stylesheets="@../../styles/principal.css">
+
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+    <!-- Filtros -->
+    <HBox spacing="10">
+        <TextField fx:id="filtroCodigo" promptText="Código" />
+        <TextField fx:id="filtroDescripcion" promptText="Descripción" />
+        <TextField fx:id="filtroCategoria" promptText="Categoría" />
+        <TextField fx:id="filtroBarras" promptText="Código Barras" />
+    </HBox>
+
+    <!-- Tabla de productos -->
+    <TableView fx:id="tablaProductos" prefHeight="200.0" VBox.vgrow="ALWAYS" />
+
+    <!-- Seleccionados -->
+    <Label text="Productos seleccionados:" />
+    <TableView fx:id="tablaSeleccionados" editable="true" prefHeight="200.0" VBox.vgrow="ALWAYS" />
+
+    <!-- Totales -->
+    <HBox spacing="30">
+        <Label fx:id="totalCantidadLabel" text="Total productos: 0" />
+        <Label fx:id="totalImporteLabel" text="Total importe: $0.00" />
+    </HBox>
+
+    <!-- Tipo de venta -->
+    <HBox spacing="10">
+        <Label text="Tipo de venta:" />
+        <ComboBox fx:id="comboTipoVenta" prefWidth="120" />
+        <TextField fx:id="campoCredito" promptText="Total crédito" disable="true" />
+    </HBox>
+
+    <Button text="Generar Venta" onAction="#generarVenta" />
+
+</VBox>
