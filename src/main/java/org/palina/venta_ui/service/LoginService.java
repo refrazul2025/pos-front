@@ -20,7 +20,7 @@ public class LoginService {
     }
 
     public UserDto validate(String username, String password){
-        String url = "http://192.168.100.151:9000/api/v1/usuario/validate";
+        String url = "http://localhost:8080/api/v1/user/validate";
 
         try {
             UserDto userDto = new UserDto();

@@ -2,18 +2,28 @@ package org.palina.venta_ui.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+
 public class UserDto {
+
+    private Long id;
+
     @JsonProperty("username")
     private String username;
 
     @JsonProperty("password")
     private String password;
 
-    @JsonProperty("correo")
-    private String correo;
+    @JsonProperty("email")
+    private String email;
 
-    @JsonProperty("usertype")
-    private String usertype;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getUsername() {
         return username;
@@ -31,19 +41,11 @@ public class UserDto {
         this.password = password;
     }
 
-    public String getCorreo() {
-        return correo;
+    public String getEmail() {
+        return email;
     }
 
-    public void setCorreo(String correo) {
-        this.correo = correo;
-    }
-
-    public String getUsertype() {
-        return usertype;
-    }
-
-    public void setUsertype(String usertype) {
-        this.usertype = usertype;
+    public void setEmail(String email) {
+        this.email = email;
     }
 }
