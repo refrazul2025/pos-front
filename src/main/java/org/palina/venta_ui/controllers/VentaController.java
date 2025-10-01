@@ -2,55 +2,93 @@ package org.palina.venta_ui.controllers;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableSet;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.print.Printer;
+import javafx.print.PrinterJob;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.KeyCode;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
+import javafx.stage.Stage;
+import javafx.util.StringConverter;
 import javafx.util.converter.IntegerStringConverter;
+import org.palina.venta_ui.dto.*;
 import org.palina.venta_ui.service.ProductoService;
-import org.palina.venta_ui.dto.Producto;
-import org.palina.venta_ui.dto.ProductoDto;
+import org.palina.venta_ui.service.VentaService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
+import javax.print.*;
+import javax.print.attribute.HashPrintRequestAttributeSet;
+import javax.print.attribute.PrintRequestAttributeSet;
+import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
+
 @Controller
-public class VentaController implements Initializable {
+public class VentaController implements Initializable, PrincipalSection {
+
+    @Autowired
+    private ProductoService productoService;
+
+    @Autowired
+    private VentaService ventaService;
 
     @FXML private TextField filtroCodigo, filtroDescripcion, filtroCategoria, filtroBarras;
     @FXML private TableView<Producto> tablaProductos, tablaSeleccionados;
-    @FXML private Label totalCantidadLabel, totalImporteLabel;
-    @FXML private ComboBox<String> comboTipoVenta;
-    @FXML private TextField campoCredito;
 
+    @FXML private Label totalProductosValue;
+    @FXML private Label totalImporteValue;
+    @FXML private ComboBox<String> comboTipoPago;
+    @FXML private ComboBox<String> comboTipoVenta;
+    @FXML private TextField clienteField;
+    @FXML private Button generarVentaButton;
     private ObservableList<Producto> productos;
     private ObservableList<Producto> productosSeleccionados;
 
+    private boolean resumenAbierto = false;
+
+    private UserDto usuario;
+    private OutletDto tienda;
+
+    @Override
+    public void setUsuario(UserDto usuario) {
+        this.usuario = usuario;
+    }
+
+    @Override
+    public void setTienda(OutletDto tienda) {
+        this.tienda = tienda;
+    }
+
+    @Override
+    public void initData() {
+        cargarProductos();
+    }
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        cargarProductos();
-
-        comboTipoVenta.getItems().addAll("Contado", "Crédito");
-        comboTipoVenta.setValue("Contado");
-        campoCredito.setDisable(true);
-
-        comboTipoVenta.setOnAction(e -> {
-            if ("Crédito".equals(comboTipoVenta.getValue())) {
-                campoCredito.setDisable(false);
-                campoCredito.setText(String.format("%.2f", calcularTotalImporte()));
-            } else {
-                campoCredito.setDisable(true);
-                campoCredito.clear();
-            }
-        });
-
+        productos = FXCollections.observableArrayList();
+        productosSeleccionados = FXCollections.observableArrayList();
         productosSeleccionados.addListener((javafx.collections.ListChangeListener<Producto>) c -> actualizarTotales());
+        comboTipoPago.setValue("Efectivo");
+        comboTipoVenta.setValue("Contado");
 
+        generarVentaButton.setOnAction(e -> generarVenta());
         filtroCodigo.textProperty().addListener((obs, oldV, newV) -> aplicarFiltro());
         filtroDescripcion.textProperty().addListener((obs, oldV, newV) -> aplicarFiltro());
         filtroCategoria.textProperty().addListener((obs, oldV, newV) -> aplicarFiltro());
@@ -58,13 +96,13 @@ public class VentaController implements Initializable {
     }
 
     private void cargarProductos() {
-        ProductoService service = new ProductoService(null);
-        List<ProductoDto> dtos = service.getProducts();
+        List<ProductoDto> dtos = productoService.getProducts(tienda);
 
         productos = FXCollections.observableArrayList(
                 dtos.stream().map(p -> new Producto(
-                        p.getCodigo(), p.getDescripcion(), p.getCategoria1(), p.getCategoria2(),
-                        p.getCodigoBarras(), p.getPrecioVenta(), p.getPrecioCompra(), p.getStockActual())).collect(Collectors.toList())
+                        p.getCode(), p.getDescription(), p.getCategory1(), p.getCategory2(),
+                        p.getBarcode(), p.getSalePrice(), p.getPurchasePrice(), p.getCurrentStock()))
+                        .collect(toList())
         );
         productosSeleccionados = FXCollections.observableArrayList();
 
@@ -81,22 +119,31 @@ public class VentaController implements Initializable {
                 crearColumna("Stock", "stockActual")
         );
 
+        tablaSeleccionados.setEditable(true);
         tablaSeleccionados.getColumns().addAll(
                 crearColumna("Código", "codigo"),
                 crearColumna("Descripción", "descripcion"),
                 crearColumnaCantidad(),
-                crearColumna("Precio", "precioVenta"),
-                crearColumna("Stock", "stockActual")
+                crearColumnaPrecioEditable(),
+                crearColumna("Categoria2", "categoria2")
         );
 
         tablaProductos.setOnMouseClicked(e -> {
             if (e.getClickCount() == 2) {
                 Producto p = tablaProductos.getSelectionModel().getSelectedItem();
-                if (p != null && !productosSeleccionados.contains(p)) {
-                    Producto copia = new Producto(p.getCodigo(), p.getDescripcion(), p.getCategoria1(),
-                            p.getCategoria2(), p.getCodigoBarras(), p.getPrecioVenta(), 0.0, p.getStockActual());
-                    copia.setCantidad(1);
-                    productosSeleccionados.add(copia);
+                if (p != null) {
+                    boolean yaExiste = productosSeleccionados.stream()
+                            .anyMatch(prod -> prod.getCodigo().equals(p.getCodigo()));
+                    if (!yaExiste) {
+                        Producto copia = new Producto(
+                                p.getCodigo(), p.getDescripcion(), p.getCategoria1(),
+                                p.getCategoria2(), p.getCodigoBarras(),
+                                p.getPrecioVenta(), 0.0, p.getStockActual()
+                        );
+                        copia.setCantidad(1);
+                        productosSeleccionados.add(copia);
+                        actualizarTotales();
+                    }
                 }
             }
         });
@@ -106,6 +153,7 @@ public class VentaController implements Initializable {
                 Producto seleccionado = tablaSeleccionados.getSelectionModel().getSelectedItem();
                 if (seleccionado != null) {
                     productosSeleccionados.remove(seleccionado);
+                    actualizarTotales();
                 }
             }
         });
@@ -130,6 +178,41 @@ public class VentaController implements Initializable {
         return col;
     }
 
+    private TableColumn<Producto, Double> crearColumnaPrecioEditable() {
+        TableColumn<Producto, Double> colPrecio = new TableColumn<>("Precio");
+
+        // Usa el valor inicial del producto
+        colPrecio.setCellValueFactory(new PropertyValueFactory<>("precioVenta"));
+
+        // Permitir edición con conversión Double <-> String
+        colPrecio.setCellFactory(TextFieldTableCell.forTableColumn(new StringConverter<Double>() {
+            @Override
+            public String toString(Double object) {
+                return object != null ? String.format("%.2f", object) : "";
+            }
+
+            @Override
+            public Double fromString(String string) {
+                try {
+                    return Double.parseDouble(string);
+                } catch (NumberFormatException e) {
+                    return 0.0;
+                }
+            }
+        }));
+
+        // Guardar el nuevo valor en el producto y refrescar tabla + totales
+        colPrecio.setOnEditCommit(event -> {
+            Producto producto = event.getRowValue();
+            producto.setPrecioVenta(event.getNewValue() != null ? event.getNewValue() : 0.0);
+            tablaSeleccionados.refresh();
+            actualizarTotales(); // <- asegúrate que ya tienes este método
+        });
+
+        return colPrecio;
+    }
+
+
     private void aplicarFiltro() {
         tablaProductos.setItems(productos.filtered(p ->
                 p.getCodigo().toLowerCase().contains(filtroCodigo.getText().toLowerCase()) &&
@@ -140,11 +223,11 @@ public class VentaController implements Initializable {
     }
 
     private void actualizarTotales() {
-        int totalCantidad = productosSeleccionados.stream().mapToInt(Producto::getCantidad).sum();
+        int totalProductos = productosSeleccionados.stream().mapToInt(Producto::getCantidad).sum();
         double totalImporte = calcularTotalImporte();
 
-        totalCantidadLabel.setText("Total productos: " + totalCantidad);
-        totalImporteLabel.setText(String.format("Total importe: $%.2f", totalImporte));
+        totalProductosValue.setText(String.valueOf(totalProductos));
+        totalImporteValue.setText(String.format("%.2f", totalImporte));
     }
 
     private double calcularTotalImporte() {
@@ -156,41 +239,216 @@ public class VentaController implements Initializable {
     @FXML
     private void generarVenta() {
         if (productosSeleccionados.isEmpty()) {
-            mostrarAlerta("Debe seleccionar al menos un producto.");
+            mostrarAlerta("No hay productos seleccionados para la venta.");
             return;
         }
 
-        String tipoVenta = comboTipoVenta.getValue();
-        double total = calcularTotalImporte();
+        if (resumenAbierto) return;
+        resumenAbierto = true;
 
-        if ("Crédito".equals(tipoVenta)) {
-            try {
-                double monto = Double.parseDouble(campoCredito.getText());
-                if (monto > total) {
-                    mostrarAlerta("El monto ingresado no puede ser mayor al total.");
-                    return;
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/venta/ResumenVentaPOSView.fxml"));
+            Parent root = loader.load();
+
+            ResumenVentaPOSController resumenController = loader.getController();
+            resumenController.setDatos(
+                    new ArrayList<>(productosSeleccionados),
+                    comboTipoPago.getValue(),
+                    comboTipoVenta.getValue(),
+                    clienteField.getText()
+            );
+
+            Stage stage = new Stage();
+            stage.setTitle("Resumen de Venta - POS");
+            stage.setScene(new Scene(root));
+            stage.showAndWait();
+
+            resumenAbierto = false;
+            if (resumenController.isConfirmado()) {
+
+                //Armamos Dto venta
+                PagoDto pagoDto = new PagoDto();
+                pagoDto.setPaymentType(comboTipoPago.getValue());
+                pagoDto.setAmountPaid(BigDecimal.valueOf(Double.valueOf(totalImporteValue.getText())));
+                List<PagoDto> pagos = new ArrayList<>();
+                pagos.add(pagoDto);
+
+                List<DetalleVentaDto> details =  productosSeleccionados.stream().map(p->
+                        {
+                          DetalleVentaDto detalleVentaDto = new DetalleVentaDto();
+                          detalleVentaDto.setProductCode(p.getCodigo());
+                          detalleVentaDto.setQuantity(p.getCantidad());
+                          detalleVentaDto.setUnitPrice(BigDecimal.valueOf(p.getPrecioVenta()));
+                          detalleVentaDto.setSubtotal(BigDecimal.valueOf( p.getPrecioVenta()*p.getCantidad()) );
+                          return detalleVentaDto;
+                        }).toList();
+
+                VentaDto venta = new VentaDto();
+                venta.setCustomer(clienteField.getText());
+                venta.setPayments(pagos);
+                venta.setSaleDetails(details);
+                venta.setSaleType(comboTipoVenta.getValue());
+                venta.setPaymentType(comboTipoPago.getValue());
+                venta.setOutletId(tienda.getId());
+
+                VentaDto response = ventaService.generarVenta(venta);
+
+                StringBuilder ticket = new StringBuilder();
+                ticket.append("      *** TIENDA HELLO KITTY ***\n\n");
+                for (Producto p : productosSeleccionados) {
+                    ticket.append(String.format("%s x%d  $%.2f\n", p.getCategoria2(), p.getCantidad(), p.getCantidad() * p.getPrecioVenta()));
                 }
-            } catch (NumberFormatException ex) {
-                mostrarAlerta("Monto inválido.");
-                return;
-            }
-        }
+                ticket.append("\n-------------------------------\n");
+                ticket.append(String.format("TOTAL: $%.2f\n", Double.valueOf( totalImporteValue.getText() ) ));
+                ticket.append("Tipo de venta: ").append(comboTipoVenta.getValue()).append("\n\n");
+                ticket.append("Gracias por su compra!\n");
 
-        mostrarAlerta("Venta realizada. Total: $" + String.format("%.2f", total));
-        productosSeleccionados.clear();
-        comboTipoVenta.setValue("Contado");
-        campoCredito.clear();
-        campoCredito.setDisable(true);
-        filtroCodigo.clear();
-        filtroDescripcion.clear();
-        filtroCategoria.clear();
-        filtroBarras.clear();
-        actualizarTotales();
+                imprimirTicketESC_POS(ticket.toString());
+
+                mostrarAlerta("Venta confirmada con éxito!");
+                // Limpiar después de venta
+                productosSeleccionados.clear();
+                clienteField.clear();
+                comboTipoPago.setValue("Efectivo");
+                comboTipoVenta.setValue("Contado");
+                filtroCodigo.clear();
+                filtroDescripcion.clear();
+                filtroCategoria.clear();
+                filtroBarras.clear();
+                actualizarTotales();
+                cargarProductos();
+            }
+
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            mostrarAlerta("Error al abrir el resumen de venta:\n" + ex.getMessage());
+            resumenAbierto = false;
+        }
     }
+
     private void mostrarAlerta(String mensaje) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Información");
         alert.setContentText(mensaje);
         alert.showAndWait();
+    }
+
+    private void imprimirTicketConJavaFX(String contenido) {
+        TextFlow textFlow = new TextFlow();
+        for (String line : contenido.split("\n")) {
+            textFlow.getChildren().add(new Text(line + "\n"));
+        }
+
+        Scene printScene = new Scene(textFlow);
+
+        ObservableSet<Printer> all =  Printer.getAllPrinters();
+
+        Printer impresora = Printer.getAllPrinters().stream().findFirst().get();
+
+        // Buscar impresora específica (puedes cambiar el nombre si deseas una en particular)
+       /* Printer impresora = Printer.getAllPrinters()
+                .stream()
+                // .filter(p -> p.getName().contains("local"))
+                .filter(p -> p.getName().contains("Printer"))
+                .findFirst()
+                .orElse(null);*/
+
+        if (impresora == null) {
+            System.err.println("❌ No se encontró impresora compatible.");
+            return;
+        }
+
+        PrinterJob job = PrinterJob.createPrinterJob(impresora);
+
+        if (job == null) {
+            System.err.println("❌ No se pudo crear el trabajo de impresión.");
+            return;
+        }
+
+        System.out.println("🖨️ Imprimiendo en: " + impresora.getName());
+
+        boolean success = job.printPage(textFlow);
+        if (success) {
+            job.endJob();
+            System.out.println("✅ Impresión completada.");
+        } else {
+            System.err.println("⚠️ Falló la impresión.");
+        }
+    }
+
+    private void imprimirTicketConJavaFX2(String contenido) {
+        try {
+            // 1️⃣ Convertir el contenido a bytes UTF-8
+            byte[] ticketBytes = contenido.getBytes(StandardCharsets.UTF_8);
+
+            // 2️⃣ Comando ESC/POS para corte total (opcional)
+            byte[] corte = new byte[]{0x1D, 0x56, 0x41, 0x10};
+            byte[] finalBytes = new byte[ticketBytes.length + corte.length];
+            System.arraycopy(ticketBytes, 0, finalBytes, 0, ticketBytes.length);
+            System.arraycopy(corte, 0, finalBytes, ticketBytes.length, corte.length);
+
+            // 3️⃣ Buscar la primera impresora disponible RAW/CUPS
+            PrintService impresora = PrintServiceLookup.lookupDefaultPrintService();
+            if (impresora == null) {
+                System.err.println("❌ No se encontró impresora compatible.");
+                return;
+            }
+
+            // 4️⃣ Crear trabajo de impresión
+            DocPrintJob job = impresora.createPrintJob();
+            Doc doc = new SimpleDoc(finalBytes, DocFlavor.BYTE_ARRAY.AUTOSENSE, null);
+
+            // 5️⃣ Enviar a la impresora
+            job.print(doc, null);
+            System.out.println("✅ Ticket enviado a la impresora: " + impresora.getName());
+
+        } catch (PrintException e) {
+            e.printStackTrace();
+            System.err.println("⚠️ Error al imprimir el ticket.");
+        }
+    }
+
+    private void imprimirTicketESC_POS(String contenido) {
+        try {
+            // 1️⃣ Listar impresoras
+            PrintService[] services = PrintServiceLookup.lookupPrintServices(null, null);
+            if (services.length == 0) {
+                System.err.println("❌ No se encontraron impresoras disponibles.");
+                return;
+            }
+
+            // 2️⃣ Buscar impresora RAW/TERMAL
+            PrintService impresora = null;
+            for (PrintService ps : services) {
+                String nombre = ps.getName().toLowerCase();
+                if (nombre.contains("ticket") || nombre.contains("raw")) {
+                    impresora = ps;
+                    break;
+                }
+            }
+
+            // Si no se encontró, usar la primera
+            if (impresora == null) {
+                impresora = services[0];
+            }
+
+            System.out.println("🖨️ Imprimiendo en: " + impresora.getName());
+
+            // 3️⃣ Preparar el documento como bytes
+            byte[] bytes = contenido.getBytes(StandardCharsets.UTF_8);
+
+            DocFlavor flavor = DocFlavor.BYTE_ARRAY.AUTOSENSE;
+            Doc doc = new SimpleDoc(bytes, flavor, null);
+
+            // 4️⃣ Crear el trabajo de impresión
+            DocPrintJob job = impresora.createPrintJob();
+            PrintRequestAttributeSet attrs = new HashPrintRequestAttributeSet();
+
+            job.print(doc, attrs);
+            System.out.println("✅ Impresión completada.");
+
+        } catch (PrintException e) {
+            System.err.println("⚠️ Error al imprimir: " + e.getMessage());
+        }
     }
 }

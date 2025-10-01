@@ -1,42 +1,104 @@
 package org.palina.venta_ui.dto;
 
 public class ProductoDto {
-    private String codigo;
-    private String descripcion;
-    private String categoria1;
-    private String categoria2;
-    private String codigoBarras;
-    private double precioCompra;
-    private double precioVenta;
-    private int stockActual;
+    private String code;
+    private String description;
+    private String category1;
+    private String category2;
+    private String barcode;
+    private double purchasePrice;
+    private double salePrice;
+    private int currentStock;
+    private int unitsAdd;
+    private int unitsDelete;
+    private long outletId;
 
-    // Getters y setters obligatorios para Jackson
-    public String getCodigo() { return codigo; }
-    public void setCodigo(String codigo) { this.codigo = codigo; }
 
-    public String getDescripcion() { return descripcion; }
-    public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
-
-    public String getCategoria1() { return categoria1; }
-    public void setCategoria1(String categoria1) { this.categoria1 = categoria1; }
-
-    public String getCategoria2() { return categoria2; }
-    public void setCategoria2(String categoria2) { this.categoria2 = categoria2; }
-
-    public String getCodigoBarras() { return codigoBarras; }
-    public void setCodigoBarras(String codigoBarras) { this.codigoBarras = codigoBarras; }
-
-    public double getPrecioCompra() {
-        return precioCompra;
+    public String getCode() {
+        return code;
     }
 
-    public void setPrecioCompra(double precioCompra) {
-        this.precioCompra = precioCompra;
+    public void setCode(String code) {
+        this.code = code;
     }
 
-    public double getPrecioVenta() { return precioVenta; }
-    public void setPrecioVenta(double precioVenta) { this.precioVenta = precioVenta; }
+    public String getDescription() {
+        return description;
+    }
 
-    public int getStockActual() { return stockActual; }
-    public void setStockActual(int stockActual) { this.stockActual = stockActual; }
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getCategory1() {
+        return category1;
+    }
+
+    public void setCategory1(String category1) {
+        this.category1 = category1;
+    }
+
+    public String getCategory2() {
+        return category2;
+    }
+
+    public void setCategory2(String category2) {
+        this.category2 = category2;
+    }
+
+    public String getBarcode() {
+        return barcode;
+    }
+
+    public void setBarcode(String barcode) {
+        this.barcode = barcode;
+    }
+
+    public double getPurchasePrice() {
+        return purchasePrice;
+    }
+
+    public void setPurchasePrice(double purchasePrice) {
+        this.purchasePrice = purchasePrice;
+    }
+
+    public double getSalePrice() {
+        return salePrice;
+    }
+
+    public void setSalePrice(double salePrice) {
+        this.salePrice = salePrice;
+    }
+
+    public int getCurrentStock() {
+        return currentStock;
+    }
+
+    public void setCurrentStock(int currentStock) {
+        this.currentStock = currentStock;
+    }
+
+    public int getUnitsAdd() {
+        return unitsAdd;
+    }
+
+    public void setUnitsAdd(int unitsAdd) {
+        this.unitsAdd = unitsAdd;
+    }
+
+    public int getUnitsDelete() {
+        return unitsDelete;
+    }
+
+    public void setUnitsDelete(int unitsDelete) {
+        this.unitsDelete = unitsDelete;
+    }
+
+    public long getOutletId() {
+        return outletId;
+    }
+
+    public void setOutletId(long outletId) {
+        this.outletId = outletId;
+    }
 }

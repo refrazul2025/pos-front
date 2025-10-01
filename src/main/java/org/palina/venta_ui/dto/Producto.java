@@ -82,4 +82,6 @@ public class Producto {
     public void setPrecioCompra(double precioCompra) {
         this.precioCompra.set(precioCompra);
     }
+
+
 }

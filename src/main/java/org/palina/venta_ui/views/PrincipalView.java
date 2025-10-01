@@ -83,10 +83,11 @@ public class PrincipalView {
 
     private void mostrarListadoProductos() {
         ProductoService productoService = new ProductoService(null);
-        List<ProductoDto> list = productoService.getProducts();
+        List<ProductoDto> list = productoService.getProducts(null);
 
         List<Producto> products = list.stream().map(p->{
-            Producto p1 = new Producto(p.getCodigo(), p.getDescripcion(), p.getCategoria1(), p.getCategoria2(), p.getCodigoBarras(), p.getPrecioVenta(), 0.0,p.getStockActual());
+            Producto p1 = new Producto(p.getCode(), p.getDescription(), p.getCategory1(), p.getCategory2(), p.getBarcode(),
+                    p.getSalePrice(), 0.0,p.getCurrentStock());
             return p1;
         }).collect(Collectors.toList());
 

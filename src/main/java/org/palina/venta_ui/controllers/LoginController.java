@@ -6,8 +6,10 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
+import org.palina.venta_ui.dto.OutletDto;
 import org.palina.venta_ui.dto.UserDto;
-import org.palina.venta_ui.service.LoginService;
+import org.palina.venta_ui.service.OutletService;
+import org.palina.venta_ui.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Controller;
@@ -21,7 +23,10 @@ public class LoginController {
     private ApplicationContext springContext;
 
     @Autowired
-    private LoginService loginService;
+    private UserService loginService;
+
+    @Autowired
+    private OutletService outletService;
 
     @FXML private TextField emailField;
     @FXML private PasswordField passwordField;
@@ -43,9 +48,19 @@ public class LoginController {
 
         loadingIndicator.setVisible(true);
 
-        UserDto userDto = loginService.validate(email, password);
+        try {
+            UserDto userDto = loginService.validate(email, password);
+            if (userDto == null) {
+                mostrarAlerta("Usuario inválido o contraseña incorrecta");
+                return;
+            }
 
-        if ( null != userDto ) {
+            OutletDto outletDto = outletService.getOutlet(userDto);
+            if (outletDto == null) {
+                mostrarAlerta("No se encontró la tienda asociada al usuario");
+                return;
+            }
+
             errorLabel.setVisible(false);
 
             // 1) Cerrar ventana de login
@@ -53,35 +68,29 @@ public class LoginController {
             loginStage.close();
 
             // 2) Cargar la vista principal desde FXML
-            try {
-                FXMLLoader loader = new FXMLLoader(
-                        getClass().getResource("/views/main/PrincipalView.fxml")
-                );
-                // Le indicamos a FXMLLoader que use Spring para resolver controladores
-                loader.setControllerFactory(springContext::getBean);
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/main/PrincipalView.fxml"));
+            loader.setControllerFactory(springContext::getBean);
+            Parent root = loader.load();
 
-                Parent root = loader.load();
+            // 3) Pasar el usuario y la tienda al controlador principal
+            PrincipalViewController controller = loader.getController();
+            controller.setUsuario(userDto);
+            controller.setTienda(outletDto);
+            controller.initData();
 
-                // 3) Pasar el usuario al controlador principal
-                PrincipalViewController controller = loader.getController();
-                controller.setUsuario(email);
+            // 4) Mostrar la ventana principal
+            Stage mainStage = new Stage();
+            mainStage.setTitle("Venta @Palina");
+            mainStage.setScene(new Scene(root));
+            mainStage.setMaximized(true);
+            mainStage.show();
 
-                // 4) Mostrar la ventana principal
-                Stage mainStage = new Stage();
-                mainStage.setTitle("Venta @Palina");
-                mainStage.setScene(new Scene(root));
-                mainStage.setMaximized(true);
-                mainStage.show();
-
-            } catch (IOException ex) {
-                ex.printStackTrace();
-                mostrarAlerta("Error al abrir la ventana principal:\n" + ex.getMessage());
-            }
-        }else {
-            errorLabel.setVisible(true);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            mostrarAlerta("Error al abrir la ventana principal:\n" + ex.getMessage());
+        } finally {
+            loadingIndicator.setVisible(false);
         }
-
-        loadingIndicator.setVisible(false);
     }
 
     private void mostrarAlerta(String mensaje) {

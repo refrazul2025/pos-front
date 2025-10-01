@@ -9,6 +9,8 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
+<?import javafx.collections.FXCollections?>
+<?import java.lang.String?>
 <VBox xmlns="http://javafx.com/javafx/8.0.221"
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="org.palina.venta_ui.controllers.VentaController"
@@ -35,19 +37,52 @@
     <Label text="Productos seleccionados:" />
     <TableView fx:id="tablaSeleccionados" editable="true" prefHeight="200.0" VBox.vgrow="ALWAYS" />
 
-    <!-- Totales -->
-    <HBox spacing="30">
-        <Label fx:id="totalCantidadLabel" text="Total productos: 0" />
-        <Label fx:id="totalImporteLabel" text="Total importe: $0.00" />
-    </HBox>
+    <!-- Footer estilo POS -->
+    <HBox spacing="20" alignment="CENTER_LEFT"
+          style="-fx-background-color: #f5f5f5; -fx-padding: 10;">
+        <children>
+            <!-- Total productos -->
+            <HBox spacing="5" alignment="CENTER_LEFT">
+                <Label text="Total productos:"/>
+                <Label fx:id="totalProductosValue" text="0"/>
+            </HBox>
 
-    <!-- Tipo de venta -->
-    <HBox spacing="10">
-        <Label text="Tipo de venta:" />
-        <ComboBox fx:id="comboTipoVenta" prefWidth="120" />
-        <TextField fx:id="campoCredito" promptText="Total crédito" disable="true" />
-    </HBox>
+            <!-- Total importe -->
+            <HBox spacing="5" alignment="CENTER_LEFT">
+                <Label text="Total importe:"/>
+                <Label fx:id="totalImporteValue" text="0.00"/>
+            </HBox>
 
-    <Button text="Generar Venta" onAction="#generarVenta" />
+            <!-- Tipo de pago -->
+            <Label text="Tipo pago:"/>
+            <ComboBox fx:id="comboTipoPago" prefWidth="120">
+                <items>
+                    <FXCollections fx:factory="observableArrayList">
+                        <String fx:value="Efectivo"/>
+                        <String fx:value="Tarjeta"/>
+                    </FXCollections>
+                </items>
+            </ComboBox>
+
+            <!-- Tipo de venta -->
+            <Label text="Tipo venta:"/>
+            <ComboBox fx:id="comboTipoVenta" prefWidth="120">
+                <items>
+                    <FXCollections fx:factory="observableArrayList">
+                        <String fx:value="Contado"/>
+                        <String fx:value="Apartado"/>
+                    </FXCollections>
+                </items>
+            </ComboBox>
+
+            <!-- Cliente -->
+            <Label text="Cliente:"/>
+            <TextField fx:id="clienteField" promptText="Cliente" prefWidth="200"/>
+
+            <!-- Botón generar venta -->
+            <Button fx:id="generarVentaButton" text="Generar venta"
+                    style="-fx-background-color: #28a745; -fx-text-fill: white; -fx-font-weight: bold;"/>
+        </children>
+    </HBox>
 
 </VBox>

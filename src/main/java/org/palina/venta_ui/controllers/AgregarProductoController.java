@@ -6,6 +6,8 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import org.palina.venta_ui.dto.OutletDto;
+import org.palina.venta_ui.dto.UserDto;
 import org.palina.venta_ui.service.ProductoService;
 import org.palina.venta_ui.dto.Producto;
 import org.palina.venta_ui.dto.ProductoDto;
@@ -18,7 +20,7 @@ import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 @Component
-public class AgregarProductoController implements Initializable {
+public class AgregarProductoController implements Initializable, PrincipalSection {
 
     @Autowired
     private ProductoService productoService;
@@ -35,11 +37,13 @@ public class AgregarProductoController implements Initializable {
     @FXML private TextField tfStockActual;
     @FXML private Button btnGuardar;
 
+    private UserDto usuario;
+    private OutletDto tienda;
+
     private ObservableList<Producto> productos;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        cargarProductos();
 
         // Configurar columnas de tabla
         tablaProductos.getColumns().setAll(
@@ -55,18 +59,18 @@ public class AgregarProductoController implements Initializable {
     }
 
     private void cargarProductos() {
-        List<ProductoDto> dtos = productoService.getProducts();
+        List<ProductoDto> dtos = productoService.getProducts(tienda);
         productos = FXCollections.observableArrayList(
                 dtos.stream()
                         .map(p -> new Producto(
-                                p.getCodigo(),
-                                p.getDescripcion(),
-                                p.getCategoria1(),
-                                p.getCategoria2(),
-                                p.getCodigoBarras(),
-                                p.getPrecioVenta(),
-                                p.getPrecioCompra(),
-                                p.getStockActual()
+                                p.getCode(),
+                                p.getDescription(),
+                                p.getCategory1(),
+                                p.getCategory2(),
+                                p.getBarcode(),
+                                p.getSalePrice(),
+                                p.getPurchasePrice(),
+                                p.getCurrentStock()
                         ))
                         .collect(Collectors.toList())
         );
@@ -77,14 +81,15 @@ public class AgregarProductoController implements Initializable {
     private void guardarProducto() {
         try {
             ProductoDto dto = new ProductoDto();
-            dto.setCodigo(tfCodigo.getText());
-            dto.setDescripcion(tfDescripcion.getText());
-            dto.setCategoria1(tfCategoria1.getText());
-            dto.setCategoria2(tfCategoria2.getText());
-            dto.setCodigoBarras(tfCodigoBarras.getText());
-            dto.setPrecioVenta(Double.parseDouble(tfPrecioVenta.getText()));
-            dto.setPrecioCompra(Double.parseDouble(tfPrecioCompra.getText()));
-            dto.setStockActual(Integer.parseInt(tfStockActual.getText()));
+            dto.setCode(tfCodigo.getText());
+            dto.setDescription(tfDescripcion.getText());
+            dto.setCategory1(tfCategoria1.getText());
+            dto.setCategory2(tfCategoria2.getText());
+            dto.setBarcode(tfCodigoBarras.getText());
+            dto.setSalePrice(Double.parseDouble(tfPrecioVenta.getText()));
+            dto.setPurchasePrice(Double.parseDouble(tfPrecioCompra.getText()));
+            dto.setCurrentStock(Integer.parseInt(tfStockActual.getText()));
+            dto.setOutletId(tienda.getId());
 
             productoService.createProduct(dto);
             mostrarAlerta(Alert.AlertType.INFORMATION, "Éxito", null, "Producto agregado correctamente.");
@@ -121,5 +126,22 @@ public class AgregarProductoController implements Initializable {
         alert.setHeaderText(header);
         alert.setContentText(contenido);
         alert.showAndWait();
+    }
+
+    @Override
+    public void setUsuario(UserDto usuario) {
+        this.usuario = usuario;
+        System.out.println("Usuario en VentaView: " + usuario.getUsername());
+    }
+
+    @Override
+    public void setTienda(OutletDto tienda) {
+        this.tienda = tienda;
+        System.out.println("Tienda en VentaView: " + tienda.getName());
+    }
+
+    @Override
+    public void initData() {
+        cargarProductos();
     }
 }
