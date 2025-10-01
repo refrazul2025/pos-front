@@ -1,6 +1,7 @@
 package org.palina.venta_ui.service;
 
 import org.palina.venta_ui.dto.ApiResponseDto;
+import org.palina.venta_ui.dto.OutletDto;
 import org.palina.venta_ui.dto.UserDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
@@ -8,44 +9,39 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-
 @Service
-public class LoginService {
+public class OutletService {
 
     private RestTemplate restTemplate;
 
     @Autowired
-    public LoginService(RestTemplate restTemplate) {
+    public OutletService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 
-    public UserDto validate(String username, String password){
-        String url = "http://localhost:8080/api/v1/user/validate";
+    public OutletDto getOutlet(UserDto userDto){
+        String url = "http://localhost:9000/api/v1/outlet/getByUser";
 
         try {
-            UserDto userDto = new UserDto();
-            userDto.setUsername(username);
-            userDto.setPassword(password);
-
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
             HttpEntity<UserDto> request = new HttpEntity<>(userDto, headers);
-            ResponseEntity<ApiResponseDto<UserDto>> response = restTemplate.exchange(
+            ResponseEntity<ApiResponseDto<OutletDto>> response = restTemplate.exchange(
                     url,
                     HttpMethod.POST,
                     request,
-                    new ParameterizedTypeReference<ApiResponseDto<UserDto>>() {}
+                    new ParameterizedTypeReference<ApiResponseDto<OutletDto>>() {}
             );
 
-            UserDto created = null;
+            OutletDto outlet = null;
 
-            ApiResponseDto<UserDto> apiResponse = response.getBody();
+            ApiResponseDto<OutletDto> apiResponse = response.getBody();
             if (apiResponse != null && apiResponse.getResultado() != null) {
-                created = apiResponse.getResultado();
-             }
+                outlet = apiResponse.getResultado();
+            }
 
-            return created;
+            return outlet;
 
         } catch (Exception e) {
             return null;

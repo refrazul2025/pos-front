@@ -1,7 +1,9 @@
 package org.palina.venta_ui.service;
 
 import org.palina.venta_ui.dto.ApiResponseDto;
+import org.palina.venta_ui.dto.OutletDto;
 import org.palina.venta_ui.dto.ProductoDto;
+import org.palina.venta_ui.dto.UserDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
@@ -21,11 +23,11 @@ public class ProductoService {
         this.restTemplate = restTemplate;
     }
 
-    public List<ProductoDto> getProducts() {
+    public List<ProductoDto> getProducts(OutletDto tienda) {
         if(restTemplate == null){
             restTemplate = new RestTemplate();
         }
-        String url = "http://192.168.100.151:9000/api/v1/inventario/l/all";
+        String url = "http://localhost:9000/api/v1/product/list/"+ tienda.getId();
 
         try {
             ResponseEntity<ApiResponseDto<List<ProductoDto>>> response = restTemplate.exchange(
@@ -47,19 +49,20 @@ public class ProductoService {
     }
 
     public void createProduct(ProductoDto productoDto) {
-        String url = "http://192.168.100.151:9000/api/v1/inventario";
+        String url = "http://localhost:9000/api/v1/product/save";
 
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
             HttpEntity<ProductoDto> request = new HttpEntity<>(productoDto, headers);
-
-            ResponseEntity<Void> response = restTemplate.postForEntity(
+            ResponseEntity<ApiResponseDto<ProductoDto>> response = restTemplate.exchange(
                     url,
+                    HttpMethod.POST,
                     request,
-                    Void.class
+                    new ParameterizedTypeReference<ApiResponseDto<ProductoDto>>() {}
             );
+
 
             if (!response.getStatusCode().is2xxSuccessful()) {
                 throw new RuntimeException("Error al crear producto: HTTP " + response.getStatusCode());
