@@ -59,6 +59,7 @@
                 <items>
                     <FXCollections fx:factory="observableArrayList">
                         <String fx:value="Efectivo"/>
+                        <String fx:value="Transferencia"/>
                         <String fx:value="Tarjeta"/>
                     </FXCollections>
                 </items>
