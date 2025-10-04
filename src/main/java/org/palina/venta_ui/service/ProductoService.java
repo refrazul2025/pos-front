@@ -71,4 +71,41 @@ public class ProductoService {
             throw new RuntimeException("No se pudo crear el producto: " + e.getMessage(), e);
         }
     }
+
+    public List<ProductoDto> getProducts(List<String> codes, OutletDto tienda) {
+        String url = "http://localhost:9000/api/v1/product/listByCode";
+
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            List<ProductoDto> list = codes.stream().map( c ->{
+                    ProductoDto p = new ProductoDto();
+                    p.setCode(c);
+                    p.setOutletId(tienda.getId());
+                    return p;
+            }).toList();
+
+            HttpEntity<List<ProductoDto>> request = new HttpEntity<>(list, headers);
+            ResponseEntity<ApiResponseDto<List<ProductoDto>>> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.POST,
+                    request,
+                    new ParameterizedTypeReference<ApiResponseDto<List<ProductoDto>>>() {}
+            );
+
+
+            if (!response.getStatusCode().is2xxSuccessful()) {
+                throw new RuntimeException("Error al consultar producto: HTTP " + response.getStatusCode());
+            }
+            ApiResponseDto<List<ProductoDto>> apiResponse = response.getBody();
+
+            return apiResponse != null && apiResponse.getResultado() != null
+                    ? apiResponse.getResultado()
+                    : new ArrayList<>();
+
+        } catch (Exception e) {
+            throw new RuntimeException("No se pudo crear el producto: " + e.getMessage(), e);
+        }
+    }
 }
