@@ -22,6 +22,7 @@ import javafx.util.converter.IntegerStringConverter;
 import org.palina.venta_ui.dto.*;
 import org.palina.venta_ui.service.ProductoService;
 import org.palina.venta_ui.service.VentaService;
+import org.palina.venta_ui.util.TicketPrinter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
@@ -57,9 +58,11 @@ public class VentaController implements Initializable, PrincipalSection {
     @FXML private ComboBox<String> comboTipoVenta;
     @FXML private TextField clienteField;
     @FXML private Button generarVentaButton;
+    @FXML private TextField montoApartadoField;
+
+
     private ObservableList<Producto> productos;
     private ObservableList<Producto> productosSeleccionados;
-
     private boolean resumenAbierto = false;
 
     private UserDto usuario;
@@ -82,6 +85,15 @@ public class VentaController implements Initializable, PrincipalSection {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        comboTipoVenta.valueProperty().addListener((obs, oldValue, newValue) -> {
+            if ("Apartado".equalsIgnoreCase(newValue)) {
+                montoApartadoField.setDisable(false);
+            } else {
+                montoApartadoField.clear();
+                montoApartadoField.setDisable(true);
+            }
+        });
+
         productos = FXCollections.observableArrayList();
         productosSeleccionados = FXCollections.observableArrayList();
         productosSeleccionados.addListener((javafx.collections.ListChangeListener<Producto>) c -> actualizarTotales());
@@ -246,6 +258,26 @@ public class VentaController implements Initializable, PrincipalSection {
         if (resumenAbierto) return;
         resumenAbierto = true;
 
+        if(comboTipoVenta.getValue().equalsIgnoreCase("Apartado")){
+            if(null == montoApartadoField.getText() || montoApartadoField.getText().isEmpty()){
+                mostrarAlerta("Para apartados ingresa el monto");
+                return;
+            }
+
+            try {
+                Double.valueOf(montoApartadoField.getText());
+            }catch (Exception e){
+                mostrarAlerta("Ingresa un monto valido de apartado");
+                return;
+            }
+
+            if(null == clienteField.getText() || clienteField.getText().isEmpty()){
+                mostrarAlerta("Para apartados ingresa el cliente");
+                return;
+            }
+        }
+
+
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/venta/ResumenVentaPOSView.fxml"));
             Parent root = loader.load();
@@ -269,7 +301,15 @@ public class VentaController implements Initializable, PrincipalSection {
                 //Armamos Dto venta
                 PagoDto pagoDto = new PagoDto();
                 pagoDto.setPaymentType(comboTipoPago.getValue());
-                pagoDto.setAmountPaid(BigDecimal.valueOf(Double.valueOf(totalImporteValue.getText())));
+
+                if(comboTipoVenta.getValue().equalsIgnoreCase("Apartado")){
+                    //Apartado
+                    pagoDto.setAmountPaid(BigDecimal.valueOf(Double.valueOf(montoApartadoField.getText())));
+                }else{
+                    //Contado
+                    pagoDto.setAmountPaid(BigDecimal.valueOf(Double.valueOf(totalImporteValue.getText())));
+                }
+
                 List<PagoDto> pagos = new ArrayList<>();
                 pagos.add(pagoDto);
 
@@ -293,21 +333,21 @@ public class VentaController implements Initializable, PrincipalSection {
 
                 VentaDto response = ventaService.generarVenta(venta);
 
-                StringBuilder ticket = new StringBuilder();
-                ticket.append("      *** TIENDA HELLO KITTY ***\n\n");
-                for (Producto p : productosSeleccionados) {
-                    ticket.append(String.format("%s x%d  $%.2f\n", p.getCategoria2(), p.getCantidad(), p.getCantidad() * p.getPrecioVenta()));
-                }
-                ticket.append("\n-------------------------------\n");
-                ticket.append(String.format("TOTAL: $%.2f\n", Double.valueOf( totalImporteValue.getText() ) ));
-                ticket.append("Tipo de venta: ").append(comboTipoVenta.getValue()).append("\n\n");
-                ticket.append("Gracias por su compra!\n");
+                try {
+                    List<String> codes = venta.getSaleDetails()
+                            .stream()
+                            .map(DetalleVentaDto::getProductCode).toList();
+                    List<ProductoDto> productsCodes = productoService.getProducts(tienda);
 
-                imprimirTicketESC_POS(ticket.toString());
+                    TicketPrinter.generarTicket(response, productsCodes, tienda.getName());
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
 
                 mostrarAlerta("Venta confirmada con éxito!");
                 // Limpiar después de venta
                 productosSeleccionados.clear();
+                montoApartadoField.clear();
                 clienteField.clear();
                 comboTipoPago.setValue("Efectivo");
                 comboTipoVenta.setValue("Contado");

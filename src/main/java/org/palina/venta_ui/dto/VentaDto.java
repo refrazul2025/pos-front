@@ -5,13 +5,32 @@ import java.util.List;
 
 public class VentaDto {
 
+    private Long id;
+    private String saleDate;
     private String saleType;
     private BigDecimal total;
     private String customer;
     private Long outletId;
     private String paymentType;
+    private boolean saleClosed;
     private List<DetalleVentaDto> saleDetails;
     private List<PagoDto> payments;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getSaleDate() {
+        return saleDate;
+    }
+
+    public void setSaleDate(String saleDate) {
+        this.saleDate = saleDate;
+    }
 
     public String getSaleType() {
         return saleType;
@@ -43,6 +62,14 @@ public class VentaDto {
 
     public void setOutletId(Long outletId) {
         this.outletId = outletId;
+    }
+
+    public boolean isSaleClosed() {
+        return saleClosed;
+    }
+
+    public void setSaleClosed(boolean saleClosed) {
+        this.saleClosed = saleClosed;
     }
 
     public String getPaymentType() {

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.collections.FXCollections?>
+<?import java.lang.String?>
+
+<VBox xmlns="http://javafx.com/javafx/8.0.221"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.palina.venta_ui.controllers.ConsultaVentaController"
+      spacing="10"
+      styleClass="root"
+      stylesheets="@../../styles/principal.css">
+
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+    <!-- 🔍 Filtros -->
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label text="Id Venta:"/>
+        <TextField fx:id="filtroIdVenta" promptText="Id venta" prefWidth="100"/>
+
+        <Label text="Cliente:"/>
+        <TextField fx:id="filtroCliente" promptText="Nombre cliente" prefWidth="200"/>
+
+        <Label text="Fecha:"/>
+        <DatePicker fx:id="filtroFecha" promptText="Fecha venta"/>
+
+        <Button fx:id="buscarButton" text="Buscar"
+                style="-fx-background-color: #007bff; -fx-text-fill: white; -fx-font-weight: bold;"/>
+    </HBox>
+
+    <!-- 🧾 Tabla de ventas generales -->
+    <Label text="Ventas registradas:" style="-fx-font-weight: bold;"/>
+    <TableView fx:id="tablaVentas" prefHeight="250.0" VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn fx:id="colVentaId" text="ID Venta" prefWidth="80"/>
+            <TableColumn fx:id="colFechaVenta" text="Fecha" prefWidth="120"/>
+            <TableColumn fx:id="colCliente" text="Cliente" prefWidth="200"/>
+            <TableColumn fx:id="colTipoVenta" text="Tipo Venta" prefWidth="120"/>
+            <TableColumn fx:id="colTotalVenta" text="Total" prefWidth="100"/>
+            <TableColumn fx:id="colEstado" text="Cerrada" prefWidth="80"/>
+        </columns>
+    </TableView>
+
+    <!-- 💰 Detalle de pagos -->
+    <Label text="Pagos registrados:" style="-fx-font-weight: bold;"/>
+    <TableView fx:id="tablaPagos" prefHeight="200.0" VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn fx:id="colPagoId" text="ID Pago" prefWidth="100"/>
+            <TableColumn fx:id="colMontoPago" text="Monto Pagado" prefWidth="120"/>
+            <TableColumn fx:id="colFechaPago" text="Fecha Pago" prefWidth="150"/>
+            <TableColumn fx:id="colTipoPago" text="Tipo Pago" prefWidth="120"/>
+        </columns>
+    </TableView>
+
+    <!-- 🧾 Footer para agregar pago -->
+    <HBox spacing="15" alignment="CENTER_LEFT"
+          style="-fx-background-color: #f8f9fa; -fx-padding: 10; -fx-border-color: #ddd; -fx-border-width: 1 0 0 0;">
+        <Label text="Agregar pago:" style="-fx-font-weight: bold;"/>
+        <Label text="Monto:"/>
+        <TextField fx:id="montoPagoField" promptText="Monto a pagar" prefWidth="120"/>
+
+        <Label text="Tipo de pago:"/>
+        <ComboBox fx:id="comboTipoPagoNuevo" prefWidth="150">
+            <items>
+                <FXCollections fx:factory="observableArrayList">
+                    <String fx:value="Efectivo"/>
+                    <String fx:value="Transferencia"/>
+                    <String fx:value="Tarjeta"/>
+                </FXCollections>
+            </items>
+        </ComboBox>
+
+        <Region HBox.hgrow="ALWAYS"/>
+
+        <Button fx:id="agregarPagoButton" text="Guardar pago"
+                style="-fx-background-color: #28a745; -fx-text-fill: white; -fx-font-weight: bold;"/>
+    </HBox>
+
+</VBox>

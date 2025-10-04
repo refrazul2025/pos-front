@@ -5,11 +5,20 @@ import java.time.LocalDate;
 
 public class PagoDto {
 
+    private Long id;
     private BigDecimal amountPaid;
     private LocalDate paymentDate;
     private String paymentType;
 
-    public BigDecimal getAmountPaid(BigDecimal bigDecimal) {
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public BigDecimal getAmountPaid() {
         return amountPaid;
     }
 

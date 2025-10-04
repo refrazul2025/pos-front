@@ -59,7 +59,7 @@ public class PrincipalViewController implements Initializable, PrincipalSection 
         // Configurar navegación de menú
         menuInventarioAgregar.setOnAction(evt -> loadSection("/inventario/AgregarProductoView.fxml"));
         menuVentaGenerar.setOnAction(evt -> loadSection("/venta/VentaView.fxml"));
-        menuApartados.setOnAction(evt -> loadSection("ApartadosView.fxml"));
+        menuApartados.setOnAction(evt -> loadSection("/venta/ConsultaVentaView.fxml"));
         menuAdminUsuarios.setOnAction(evt -> loadSection("AdminUsuariosView.fxml"));
         menuAdminRegistros.setOnAction(evt -> loadSection("AdminRegistrosView.fxml"));
     }
