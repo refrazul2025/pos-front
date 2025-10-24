@@ -11,6 +11,7 @@ public class VentaDto {
     private BigDecimal total;
     private String customer;
     private Long outletId;
+    private Long userId;
     private String paymentType;
     private boolean saleClosed;
     private List<DetalleVentaDto> saleDetails;
@@ -62,6 +63,14 @@ public class VentaDto {
 
     public void setOutletId(Long outletId) {
         this.outletId = outletId;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
     public boolean isSaleClosed() {

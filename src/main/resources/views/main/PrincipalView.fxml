@@ -32,6 +32,7 @@
                         <items>
                             <MenuItem fx:id="menuAdminUsuarios" text="Usuarios"/>
                             <MenuItem fx:id="menuAdminRegistros" text="Registros"/>
+                            <MenuItem fx:id="menuAdminCaja" text="Caja"/>
                         </items>
                     </Menu>
                 </menus>

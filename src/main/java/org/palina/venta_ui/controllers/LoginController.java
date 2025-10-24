@@ -6,8 +6,11 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
+import org.palina.venta_ui.dto.ApiResponseDto;
+import org.palina.venta_ui.dto.AsistenciaDto;
 import org.palina.venta_ui.dto.OutletDto;
 import org.palina.venta_ui.dto.UserDto;
+import org.palina.venta_ui.service.AsistenciaService;
 import org.palina.venta_ui.service.OutletService;
 import org.palina.venta_ui.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +30,9 @@ public class LoginController {
 
     @Autowired
     private OutletService outletService;
+
+    @Autowired
+    private AsistenciaService asistenciaService;
 
     @FXML private TextField emailField;
     @FXML private PasswordField passwordField;
@@ -60,6 +66,8 @@ public class LoginController {
                 mostrarAlerta("No se encontró la tienda asociada al usuario");
                 return;
             }
+
+            asistenciaService.registrarAsistencia(userDto.getId());
 
             errorLabel.setVisible(false);
 

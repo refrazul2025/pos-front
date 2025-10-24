@@ -330,6 +330,7 @@ public class VentaController implements Initializable, PrincipalSection {
                 venta.setSaleType(comboTipoVenta.getValue());
                 venta.setPaymentType(comboTipoPago.getValue());
                 venta.setOutletId(tienda.getId());
+                venta.setUserId(usuario.getId());
 
                 VentaDto response = ventaService.generarVenta(venta);
 

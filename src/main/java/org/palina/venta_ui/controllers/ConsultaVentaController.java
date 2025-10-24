@@ -146,13 +146,15 @@ public class ConsultaVentaController {
             nuevoPago.setPaymentDate(java.time.LocalDate.now());
 
             // 🔹 Llamar al servicio para guardar en backend
-            ventaService.agregarPago(ventaSeleccionada.getId(), nuevoPago);
+            VentaDto ventaDto = ventaService.agregarPago(ventaSeleccionada.getId(), nuevoPago);
 
             // 🔹 Actualizar la tabla localmente
             ventaSeleccionada.getPayments().add(nuevoPago);
             tablaPagos.getItems().add(nuevoPago);
             montoPagoField.clear();
             comboTipoPagoNuevo.getSelectionModel().clearSelection();
+
+
 
         } catch (NumberFormatException ex) {
             mostrarAlerta("Monto inválido", "El monto debe ser un número válido.");

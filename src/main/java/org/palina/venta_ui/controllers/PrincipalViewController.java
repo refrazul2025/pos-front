@@ -27,6 +27,7 @@ public class PrincipalViewController implements Initializable, PrincipalSection 
     @FXML private MenuItem menuApartados;
     @FXML private MenuItem menuAdminUsuarios;
     @FXML private MenuItem menuAdminRegistros;
+    @FXML private MenuItem menuAdminCaja;
 
     @FXML private Label usuarioLabel;
     @FXML private VBox contenidoCentral;
@@ -62,6 +63,7 @@ public class PrincipalViewController implements Initializable, PrincipalSection 
         menuApartados.setOnAction(evt -> loadSection("/venta/ConsultaVentaView.fxml"));
         menuAdminUsuarios.setOnAction(evt -> loadSection("AdminUsuariosView.fxml"));
         menuAdminRegistros.setOnAction(evt -> loadSection("AdminRegistrosView.fxml"));
+        menuAdminCaja.setOnAction(evt->loadSection("/admin/CajaView.fxml"));
     }
 
     /**
