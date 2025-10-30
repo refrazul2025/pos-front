@@ -103,6 +103,7 @@ public class TicketPrinter {
         // Fecha y hora
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
         baos.write(ALIGN_LEFT);
+        baos.write(("Ticket: " + venta.getId() + "\n").getBytes(StandardCharsets.ISO_8859_1));
         baos.write(("Fecha/Hora: " + LocalDateTime.now().format(formatter) + "\n").getBytes(StandardCharsets.ISO_8859_1));
 
         // Cliente

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="org.palina.venta_ui.controllers.CajaController">
+
+    <!-- ✅ Encabezado con saldo -->
+    <top>
+        <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 15;">
+            <Label text="Saldo actual en caja:" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+            <Label fx:id="lblSaldoActual" text="0.00" style="-fx-font-size: 16px;"/>
+        </HBox>
+    </top>
+
+    <!-- ✅ Centro con dos tablas -->
+    <center>
+        <VBox spacing="20" style="-fx-padding: 15;">
+
+            <!-- 📌 Tabla Totales de Caja -->
+            <TitledPane text="Totales de Caja" expanded="true">
+                <VBox>
+                    <TableView fx:id="tablaTotalesCaja" prefHeight="150">
+                        <columns>
+                            <TableColumn fx:id="colTipoCaja" text="Tipo de Caja" prefWidth="200"/>
+                            <TableColumn fx:id="colSaldoCaja" text="Saldo" prefWidth="150"/>
+                        </columns>
+                    </TableView>
+                </VBox>
+            </TitledPane>
+
+            <!-- 📌 Tabla Ventas Realizadas -->
+            <TitledPane text="Ventas Realizadas" expanded="true">
+                <VBox>
+                    <TableView fx:id="tablaVentas" prefHeight="250">
+                        <columns>
+                            <TableColumn fx:id="colFechaVenta" text="Fecha" prefWidth="150"/>
+                            <TableColumn fx:id="colProductoVenta" text="Producto" prefWidth="200"/>
+                            <TableColumn fx:id="colImporteVenta" text="Importe" prefWidth="150"/>
+                        </columns>
+                    </TableView>
+                </VBox>
+            </TitledPane>
+
+        </VBox>
+    </center>
+
+    <!-- ✅ Botón Actualizar -->
+    <bottom>
+        <HBox spacing="10" alignment="CENTER" style="-fx-padding: 10;">
+            <Button text="Actualizar" onAction="#actualizarVista"/>
+        </HBox>
+    </bottom>
+
+</BorderPane>
