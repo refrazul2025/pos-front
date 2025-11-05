@@ -35,69 +35,92 @@
     <!-- Tabla de productos -->
     <TableView fx:id="tablaProductos" prefHeight="200.0" VBox.vgrow="ALWAYS" />
 
+    <!-- Formulario rápido inline -->
+    <VBox fx:id="formAgregarProducto" spacing="5" visible="false" managed="false" style="-fx-border-color: #ccc; -fx-border-radius: 5; -fx-background-color: #f9f9f9;">
+        <padding>
+            <Insets top="5" right="5" bottom="5" left="5"/>
+        </padding>
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <TextField fx:id="nuevaDescripcionField" promptText="Descripción" prefWidth="200"/>
+            <TextField fx:id="nuevaCategoriaField" promptText="Texto ticket" prefWidth="120"/>
+            <TextField fx:id="nuevoPrecioField" promptText="Precio" prefWidth="80"/>
+            <Button fx:id="guardarProductoButton" text="Agregar"
+                    style="-fx-background-color: #28a745; -fx-text-fill: white; -fx-font-weight: bold;"/>
+            <Button fx:id="cancelarProductoButton" text="Cancelar"
+                    style="-fx-background-color: #dc3545; -fx-text-fill: white; -fx-font-weight: bold;"/>
+        </HBox>
+    </VBox>
+
+    <!-- Botón para mostrar formulario rápido -->
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <padding>
+            <Insets top="5" right="5" bottom="5" left="5"/>
+        </padding>
+        <Button fx:id="mostrarFormProductoButton" text="Agregar producto rápido"
+                style="-fx-background-color: #007bff; -fx-text-fill: white; -fx-font-weight: bold;" />
+    </HBox>
+
     <!-- Seleccionados -->
     <Label text="Productos seleccionados:" />
     <TableView fx:id="tablaSeleccionados" editable="true" prefHeight="200.0" VBox.vgrow="ALWAYS" />
 
     <!-- Footer estilo POS -->
     <VBox spacing="10" style="-fx-background-color: #f5f5f5; -fx-padding: 10;">
-        <children>
-            <!-- Primera fila: totales -->
-            <HBox spacing="20" alignment="CENTER_LEFT">
-                <!-- Total productos -->
-                <HBox spacing="5" alignment="CENTER_LEFT">
-                    <Label text="Total productos:"/>
-                    <Label fx:id="totalProductosValue" text="0"/>
-                </HBox>
-
-                <!-- Total importe -->
-                <HBox spacing="5" alignment="CENTER_LEFT">
-                    <Label text="Total importe:"/>
-                    <Label fx:id="totalImporteValue" text="0.00"/>
-                </HBox>
+        <!-- Primera fila: totales -->
+        <HBox spacing="20" alignment="CENTER_LEFT">
+            <!-- Total productos -->
+            <HBox spacing="5" alignment="CENTER_LEFT">
+                <Label text="Total productos:"/>
+                <Label fx:id="totalProductosValue" text="0"/>
             </HBox>
 
-            <!-- Segunda fila: opciones de pago, venta y cliente -->
-            <HBox spacing="15" alignment="CENTER_LEFT">
-                <!-- Tipo de pago -->
-                <Label text="Tipo pago:"/>
-                <ComboBox fx:id="comboTipoPago" prefWidth="120">
-                    <items>
-                        <FXCollections fx:factory="observableArrayList">
-                            <String fx:value="Efectivo"/>
-                            <String fx:value="Transferencia"/>
-                            <String fx:value="Tarjeta"/>
-                        </FXCollections>
-                    </items>
-                </ComboBox>
-
-                <!-- Tipo de venta -->
-                <Label text="Tipo venta:"/>
-                <ComboBox fx:id="comboTipoVenta" prefWidth="120">
-                    <items>
-                        <FXCollections fx:factory="observableArrayList">
-                            <String fx:value="Contado"/>
-                            <String fx:value="Apartado"/>
-                        </FXCollections>
-                    </items>
-                </ComboBox>
-
-                <!-- Monto apartado -->
-                <Label text="Monto A/C:"/>
-                <TextField fx:id="montoApartadoField" promptText="Monto apartado" prefWidth="120" disable="true"/>
-
-                <!-- Cliente -->
-                <Label text="Cliente:"/>
-                <TextField fx:id="clienteField" promptText="Cliente" prefWidth="200"/>
-
-                <!-- Espaciador para empujar el botón a la derecha -->
-                <Region HBox.hgrow="ALWAYS"/>
-
-                <!-- Botón generar venta -->
-                <Button fx:id="generarVentaButton" text="Generar venta"
-                        style="-fx-background-color: #28a745; -fx-text-fill: white; -fx-font-weight: bold;"/>
+            <!-- Total importe -->
+            <HBox spacing="5" alignment="CENTER_LEFT">
+                <Label text="Total importe:"/>
+                <Label fx:id="totalImporteValue" text="0.00"/>
             </HBox>
-        </children>
+        </HBox>
+
+        <!-- Segunda fila: opciones de pago, venta y cliente -->
+        <HBox spacing="15" alignment="CENTER_LEFT">
+            <!-- Tipo de pago -->
+            <Label text="Tipo pago:"/>
+            <ComboBox fx:id="comboTipoPago" prefWidth="120">
+                <items>
+                    <FXCollections fx:factory="observableArrayList">
+                        <String fx:value="Efectivo"/>
+                        <String fx:value="Transferencia"/>
+                        <String fx:value="Tarjeta"/>
+                    </FXCollections>
+                </items>
+            </ComboBox>
+
+            <!-- Tipo de venta -->
+            <Label text="Tipo venta:"/>
+            <ComboBox fx:id="comboTipoVenta" prefWidth="120">
+                <items>
+                    <FXCollections fx:factory="observableArrayList">
+                        <String fx:value="Contado"/>
+                        <String fx:value="Apartado"/>
+                    </FXCollections>
+                </items>
+            </ComboBox>
+
+            <!-- Monto apartado -->
+            <Label text="Monto A/C:"/>
+            <TextField fx:id="montoApartadoField" promptText="Monto apartado" prefWidth="120" disable="true"/>
+
+            <!-- Cliente -->
+            <Label text="Cliente:"/>
+            <TextField fx:id="clienteField" promptText="Cliente" prefWidth="200"/>
+
+            <!-- Espaciador para empujar el botón a la derecha -->
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <!-- Botón generar venta -->
+            <Button fx:id="generarVentaButton" text="Generar venta"
+                    style="-fx-background-color: #28a745; -fx-text-fill: white; -fx-font-weight: bold;"/>
+        </HBox>
     </VBox>
 
 </VBox>
