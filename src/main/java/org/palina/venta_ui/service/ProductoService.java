@@ -80,10 +80,10 @@ public class ProductoService {
             headers.setContentType(MediaType.APPLICATION_JSON);
 
             List<ProductoDto> list = codes.stream().map( c ->{
-                    ProductoDto p = new ProductoDto();
-                    p.setCode(c);
-                    p.setOutletId(tienda.getId());
-                    return p;
+                ProductoDto p = new ProductoDto();
+                p.setCode(c);
+                p.setOutletId(tienda.getId());
+                return p;
             }).toList();
 
             HttpEntity<List<ProductoDto>> request = new HttpEntity<>(list, headers);
@@ -108,4 +108,40 @@ public class ProductoService {
             throw new RuntimeException("No se pudo crear el producto: " + e.getMessage(), e);
         }
     }
+
+    public ProductoDto createFastProduct(ProductoDto productoDto) {
+        String url = "http://localhost:9000/api/v1/product/save-fast";
+
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            HttpEntity<ProductoDto> request = new HttpEntity<>(productoDto, headers);
+            ResponseEntity<ApiResponseDto<ProductoDto>> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.POST,
+                    request,
+                    new ParameterizedTypeReference<ApiResponseDto<ProductoDto>>() {}
+            );
+
+
+            if (!response.getStatusCode().is2xxSuccessful()) {
+                throw new RuntimeException("Error al crear producto: HTTP " + response.getStatusCode());
+            }
+
+            if(response.getBody() == null){
+                throw new RuntimeException("Error al crear producto: HTTP " + response.getStatusCode());
+            }
+
+            if(response.getBody().getResultado() == null){
+                throw new RuntimeException("Error al crear producto: HTTP " + response.getStatusCode());
+            }
+
+
+            return response.getBody().getResultado();
+        } catch (Exception e) {
+            throw new RuntimeException("No se pudo crear el producto: " + e.getMessage(), e);
+        }
+    }
+
 }

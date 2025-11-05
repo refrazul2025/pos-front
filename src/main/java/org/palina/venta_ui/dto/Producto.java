@@ -38,6 +38,17 @@ public class Producto {
         this.cantidad.set(1); // cantidad default
     }
 
+    public Producto(ProductoDto productoDto){
+        this.codigo.set(productoDto.getCode());
+        this.descripcion.set(productoDto.getDescription());
+        this.categoria1.set(productoDto.getCategory1());
+        this.categoria2.set(productoDto.getCategory2());
+        this.codigoBarras.set(productoDto.getBarcode());
+        this.precioVenta.set(productoDto.getSalePrice());
+        this.precioCompra.set(productoDto.getSalePrice());
+        this.stockActual.set(productoDto.getCurrentStock());
+    }
+
     // Getters y setters normales para los valores
     public String getCodigo() { return codigo.get(); }
     public void setCodigo(String value) { codigo.set(value); }

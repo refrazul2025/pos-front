@@ -14,6 +14,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.KeyCode;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
@@ -60,6 +61,15 @@ public class VentaController implements Initializable, PrincipalSection {
     @FXML private Button generarVentaButton;
     @FXML private TextField montoApartadoField;
 
+    //Formulario producto
+    @FXML private VBox formAgregarProducto;
+    @FXML private Button mostrarFormProductoButton;
+    @FXML private Button guardarProductoButton;
+    @FXML private Button cancelarProductoButton;
+
+    @FXML private TextField nuevaDescripcionField;
+    @FXML private TextField nuevaCategoriaField;
+    @FXML private TextField nuevoPrecioField;
 
     private ObservableList<Producto> productos;
     private ObservableList<Producto> productosSeleccionados;
@@ -105,6 +115,25 @@ public class VentaController implements Initializable, PrincipalSection {
         filtroDescripcion.textProperty().addListener((obs, oldV, newV) -> aplicarFiltro());
         filtroCategoria.textProperty().addListener((obs, oldV, newV) -> aplicarFiltro());
         filtroBarras.textProperty().addListener((obs, oldV, newV) -> aplicarFiltro());
+
+        //Formulario producto
+        mostrarFormProductoButton.setOnAction(e -> {
+            formAgregarProducto.setVisible(true);
+            formAgregarProducto.setManaged(true);
+        });
+
+        cancelarProductoButton.setOnAction(e -> {
+            formAgregarProducto.setVisible(false);
+            formAgregarProducto.setManaged(false);
+            limpiarFormulario();
+        });
+
+        guardarProductoButton.setOnAction(e -> {
+            agregarProductoRapido();
+            limpiarFormulario();
+            formAgregarProducto.setVisible(false);
+            formAgregarProducto.setManaged(false);
+        });
     }
 
     private void cargarProductos() {
@@ -112,8 +141,8 @@ public class VentaController implements Initializable, PrincipalSection {
 
         productos = FXCollections.observableArrayList(
                 dtos.stream().map(p -> new Producto(
-                        p.getCode(), p.getDescription(), p.getCategory1(), p.getCategory2(),
-                        p.getBarcode(), p.getSalePrice(), p.getPurchasePrice(), p.getCurrentStock()))
+                                p.getCode(), p.getDescription(), p.getCategory1(), p.getCategory2(),
+                                p.getBarcode(), p.getSalePrice(), p.getPurchasePrice(), p.getCurrentStock()))
                         .collect(toList())
         );
         productosSeleccionados = FXCollections.observableArrayList();
@@ -314,14 +343,14 @@ public class VentaController implements Initializable, PrincipalSection {
                 pagos.add(pagoDto);
 
                 List<DetalleVentaDto> details =  productosSeleccionados.stream().map(p->
-                        {
-                          DetalleVentaDto detalleVentaDto = new DetalleVentaDto();
-                          detalleVentaDto.setProductCode(p.getCodigo());
-                          detalleVentaDto.setQuantity(p.getCantidad());
-                          detalleVentaDto.setUnitPrice(BigDecimal.valueOf(p.getPrecioVenta()));
-                          detalleVentaDto.setSubtotal(BigDecimal.valueOf( p.getPrecioVenta()*p.getCantidad()) );
-                          return detalleVentaDto;
-                        }).toList();
+                {
+                    DetalleVentaDto detalleVentaDto = new DetalleVentaDto();
+                    detalleVentaDto.setProductCode(p.getCodigo());
+                    detalleVentaDto.setQuantity(p.getCantidad());
+                    detalleVentaDto.setUnitPrice(BigDecimal.valueOf(p.getPrecioVenta()));
+                    detalleVentaDto.setSubtotal(BigDecimal.valueOf( p.getPrecioVenta()*p.getCantidad()) );
+                    return detalleVentaDto;
+                }).toList();
 
                 VentaDto venta = new VentaDto();
                 venta.setCustomer(clienteField.getText());
@@ -332,9 +361,10 @@ public class VentaController implements Initializable, PrincipalSection {
                 venta.setOutletId(tienda.getId());
                 venta.setUserId(usuario.getId());
 
-                VentaDto response = ventaService.generarVenta(venta);
+                VentaDto response = null;
 
                 try {
+                    response = ventaService.generarVenta(venta);
                     List<String> codes = venta.getSaleDetails()
                             .stream()
                             .map(DetalleVentaDto::getProductCode).toList();
@@ -342,7 +372,8 @@ public class VentaController implements Initializable, PrincipalSection {
 
                     TicketPrinter.generarTicket(response, productsCodes, tienda.getName());
                 }catch (Exception e){
-                    e.printStackTrace();
+                    mostrarAlerta("Venta NO realizada / reintentar");
+                    return;
                 }
 
                 mostrarAlerta("Venta confirmada con éxito!");
@@ -491,5 +522,27 @@ public class VentaController implements Initializable, PrincipalSection {
         } catch (PrintException e) {
             System.err.println("⚠️ Error al imprimir: " + e.getMessage());
         }
+    }
+
+    private void limpiarFormulario() {
+        nuevaDescripcionField.clear();
+        nuevaCategoriaField.clear();
+        nuevoPrecioField.clear();
+    }
+
+    private void agregarProductoRapido() {
+        ProductoDto producto = new ProductoDto();
+        producto.setDescription(nuevaDescripcionField.getText());
+        producto.setDescription(nuevaDescripcionField.getText());
+        producto.setCategory2(nuevaCategoriaField.getText());
+        producto.setSalePrice(Double.valueOf(nuevoPrecioField.getText()));
+        producto.setCurrentStock(1);
+        producto.setOutletId(tienda.getId());
+
+        ProductoDto res = productoService.createFastProduct(producto);
+        Producto tablaProduct = new Producto(res);
+
+        // Agregar a la tabla y a la lista de productos
+        tablaProductos.getItems().add(tablaProduct);
     }
 }
